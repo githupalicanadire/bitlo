@@ -1,6 +1,13 @@
 using Identity.API.Models;
 using Identity.API.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using IdentityServer4.Services;
+using IdentityServer4.Models;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Identity.API.Controllers;
 
@@ -11,15 +18,21 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ILogger<AuthController> _logger;
+    private readonly ITokenService _tokenService;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        ITokenService tokenService,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _tokenService = tokenService;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
