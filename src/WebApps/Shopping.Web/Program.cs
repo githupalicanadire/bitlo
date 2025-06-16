@@ -3,10 +3,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-// Debug: Log IdentityServer configuration
-var identityServerBaseUrl = builder.Configuration["IdentityServer:BaseUrl"];
-Console.WriteLine($"🔐 IdentityServer BaseUrl: {identityServerBaseUrl}");
-
 // Add HttpClient
 builder.Services.AddHttpClient();
 
