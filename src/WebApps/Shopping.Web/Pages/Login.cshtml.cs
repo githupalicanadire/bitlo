@@ -18,6 +18,25 @@ public class LoginModel : PageModel
             return LocalRedirect(returnUrl ?? "/");
         }
 
+        // Clear any previous login message cookie
+        if (Request.Cookies.ContainsKey("LoginMessage"))
+        {
+            Response.Cookies.Delete("LoginMessage");
+        }
+
+        // Set user-friendly message based on return URL
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            if (returnUrl.Contains("/cart"))
+                ViewData["LoginMessage"] = "Please sign in to view your shopping cart.";
+            else if (returnUrl.Contains("/checkout"))
+                ViewData["LoginMessage"] = "Please sign in to proceed with checkout.";
+            else if (returnUrl.Contains("/order"))
+                ViewData["LoginMessage"] = "Please sign in to view your orders.";
+            else
+                ViewData["LoginMessage"] = "Please sign in to continue.";
+        }
+
         // Redirect to Identity Server with return URL
         var redirectUri = !string.IsNullOrEmpty(returnUrl) ? returnUrl : Url.Page("/Index");
 
