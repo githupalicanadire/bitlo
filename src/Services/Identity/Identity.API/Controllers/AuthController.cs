@@ -39,7 +39,18 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            return BadRequest(new { error = "validation_failed", error_description = "Validation failed", errors = errors });
+        }
+
+        // Check if user already exists
+        var existingUser = await _userManager.FindByEmailAsync(model.Email);
+        if (existingUser != null)
+        {
+            _logger.LogWarning("Registration attempt with existing email: {Email}", model.Email);
+            return BadRequest(new { error = "user_exists", error_description = "A user with this email already exists" });
+        }
 
         var user = new ApplicationUser
         {
@@ -47,7 +58,9 @@ public class AuthController : ControllerBase
             Email = model.Email,
             FirstName = model.FirstName,
             LastName = model.LastName,
-            EmailConfirmed = true // For simplicity
+            EmailConfirmed = true, // For development
+            IsActive = true,
+            CreatedDate = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);
@@ -55,15 +68,27 @@ public class AuthController : ControllerBase
         if (result.Succeeded)
         {
             _logger.LogInformation("User created successfully: {Email}", model.Email);
-            return Ok(new { message = "User registered successfully" });
+
+            // Auto-login after successful registration
+            var loginRequest = new LoginViewModel
+            {
+                Email = model.Email,
+                Password = model.Password,
+                RememberMe = false
+            };
+
+            return await Login(loginRequest);
         }
 
-        foreach (var error in result.Errors)
+        var errorDescriptions = result.Errors.Select(e => e.Description);
+        _logger.LogWarning("User registration failed for {Email}: {Errors}", model.Email, string.Join(", ", errorDescriptions));
+
+        return BadRequest(new
         {
-            ModelState.AddModelError(string.Empty, error.Description);
-        }
-
-        return BadRequest(ModelState);
+            error = "registration_failed",
+            error_description = "Registration failed",
+            errors = errorDescriptions
+        });
     }
 
     [HttpPost("login")]
