@@ -11,12 +11,17 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
 
+// Check if we're in development bypass mode
+var bypassAuth = builder.Configuration.GetValue<bool>("DevelopmentMode:BypassAuthentication");
+
 // Add Authentication with Identity Server
-builder.Services.AddAuthentication(options =>
+if (!bypassAuth)
 {
-    options.DefaultScheme = "Cookies";
-    options.DefaultChallengeScheme = "oidc";
-})
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = "Cookies";
+        options.DefaultChallengeScheme = "oidc";
+    })
 .AddCookie("Cookies", options =>
 {
     options.Cookie.Name = "ToyShop.Auth";
