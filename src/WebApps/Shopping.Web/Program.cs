@@ -119,12 +119,32 @@ app.Use(async (context, next) =>
     var isAuthenticated = context.User?.Identity?.IsAuthenticated == true;
 
     // Protected paths that require authentication
-    var protectedPaths = new[] { "/cart", "/checkout", "/orderlist", "/orderdetail" };
+    var protectedPaths = new[]
+    {
+        "/cart",
+        "/checkout",
+        "/orderlist",
+        "/orderdetail",
+        "/confirmation"
+    };
 
-    if (!isAuthenticated && protectedPaths.Any(p => path?.StartsWith(p) == true))
+    // Check if the current path requires authentication
+    var requiresAuth = protectedPaths.Any(p => path?.StartsWith(p) == true);
+
+    // Also check for API calls that modify data (POST requests to add to cart)
+    var isAddToCartRequest = context.Request.Method == "POST" &&
+                           (path?.Contains("/productlist") == true || path?.Contains("/productdetail") == true);
+
+    if (!isAuthenticated && (requiresAuth || isAddToCartRequest))
     {
         // Store the original URL to redirect after login
         var returnUrl = context.Request.Path + context.Request.QueryString;
+
+        // Set a user-friendly message
+        context.Response.Cookies.Append("LoginMessage",
+            "Please sign in to access this feature.",
+            new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Lax });
+
         context.Response.Redirect($"/Login?returnUrl={Uri.EscapeDataString(returnUrl)}");
         return;
     }
