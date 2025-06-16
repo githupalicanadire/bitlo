@@ -2,6 +2,7 @@ using Identity.API.Data;
 using Identity.API.Models;
 using Identity.API.Services;
 using Identity.API.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
