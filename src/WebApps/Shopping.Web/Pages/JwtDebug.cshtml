@@ -1,0 +1,227 @@
+@page
+@model Shopping.Web.Pages.JwtDebugModel
+@{
+    ViewData["Title"] = "JWT Token Debug";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-gradient-primary rounded p-3 mb-0 shadow-sm">
+            <li class="breadcrumb-item"><a asp-page="Index" class="text-white text-decoration-none"><i class="fas fa-home me-1"></i>Home</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page"><i class="fas fa-code me-1"></i>JWT Debug</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-code me-2"></i>JWT Token Debug Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.IsAuthenticated)
+                    {
+                        <div class="row">
+                            <!-- Token Status -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Token Status</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Authentication Type:</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <span class="badge @(Model.HasJwtToken ? "bg-success" : "bg-warning")">
+                                                    @(Model.HasJwtToken ? "JWT Token" : "OIDC Only")
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Token Valid:</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <span class="badge @(Model.IsTokenValid ? "bg-success" : "bg-danger")">
+                                                    @(Model.IsTokenValid ? "Valid" : "Invalid/Expired")
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @if (Model.TokenExpiration.HasValue)
+                                        {
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <strong>Expires At:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    @Model.TokenExpiration.Value.ToString("yyyy-MM-dd HH:mm:ss") UTC
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <strong>Time Remaining:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    @{
+                                                        var timeRemaining = Model.TokenExpiration.Value - DateTime.UtcNow;
+                                                        var timeRemainingText = timeRemaining.TotalSeconds > 0 
+                                                            ? $"{(int)timeRemaining.TotalMinutes} minutes, {timeRemaining.Seconds} seconds"
+                                                            : "Expired";
+                                                    }
+                                                    <span class="@(timeRemaining.TotalSeconds > 0 ? "text-success" : "text-danger")">
+                                                        @timeRemainingText
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- User Information -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="fas fa-user me-2"></i>User Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (Model.UserInfo != null)
+                                        {
+                                            <div class="row mb-2">
+                                                <div class="col-4"><strong>Name:</strong></div>
+                                                <div class="col-8">@Model.UserInfo.Name</div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-4"><strong>Email:</strong></div>
+                                                <div class="col-8">@Model.UserInfo.Email</div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-4"><strong>User ID:</strong></div>
+                                                <div class="col-8"><code>@Model.UserInfo.Id</code></div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-4"><strong>Email Verified:</strong></div>
+                                                <div class="col-8">
+                                                    <span class="badge @(Model.UserInfo.EmailVerified ? "bg-success" : "bg-warning")">
+                                                        @(Model.UserInfo.EmailVerified ? "Verified" : "Not Verified")
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (Model.HasJwtToken && !string.IsNullOrEmpty(Model.JwtToken))
+                        {
+                            <!-- JWT Token Details -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-key me-2"></i>JWT Token Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h6>Token Claims:</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Claim Type</th>
+                                                            <th>Value</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (Model.TokenClaims != null)
+                                                        {
+                                                            @foreach (var claim in Model.TokenClaims)
+                                                            {
+                                                                <tr>
+                                                                    <td><code>@claim.Key</code></td>
+                                                                    <td>@claim.Value</td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h6>Raw JWT Token:</h6>
+                                            <div class="bg-dark p-3 rounded">
+                                                <code class="text-light" style="word-break: break-all; font-size: 0.8rem;">
+                                                    @Model.JwtToken
+                                                </code>
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                This token is automatically included in API requests.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Token Actions -->
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Token Actions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <form method="post" asp-page-handler="RefreshToken" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-primary">
+                                                <i class="fas fa-sync-alt me-2"></i>Refresh Token
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <form method="post" asp-page-handler="ValidateToken" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-info">
+                                                <i class="fas fa-check-circle me-2"></i>Validate Token
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                            <h4>Authentication Required</h4>
+                            <p class="text-muted">Please login to see JWT token information.</p>
+                            <a asp-page="/Login" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh every 30 seconds to show real-time token status
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    </script>
+}
