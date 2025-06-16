@@ -6,9 +6,11 @@ builder.Services.AddRazorPages();
 // Add HttpClient
 builder.Services.AddHttpClient();
 
-// Add HttpContextAccessor and UserService
+// Add HttpContextAccessor and Authentication Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
 
 // Add Authentication with Identity Server
