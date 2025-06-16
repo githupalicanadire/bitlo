@@ -116,8 +116,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__DefaultConnection=Server=identitydb;Database=IdentityDb;User Id=sa;Password=SwN12345678;Encrypt=False;TrustServerCertificate=True
-      - IdentityServer__IssuerUri=http://identity.api:8080
-      - IdentityServer__BaseUrl=http://identity.api:8080
+      - IdentityServer__IssuerUri=http://localhost:6006
+      - IdentityServer__BaseUrl=http://localhost:6006
     depends_on:
       - identitydb
     ports:
