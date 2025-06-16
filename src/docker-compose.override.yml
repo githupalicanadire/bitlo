@@ -94,7 +94,7 @@ services:
 
   discount.grpc:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Database=Data Source=discountdb
       - IdentityServer__BaseUrl=http://identity.api:8080
