@@ -74,7 +74,7 @@ services:
 
   basket.api:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Database=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true
       - ConnectionStrings__Redis=distributedcache:6379
@@ -82,11 +82,13 @@ services:
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
+      - IdentityServer__BaseUrl=http://identity.api:8080
     depends_on:
       - basketdb
       - distributedcache
       - discount.grpc
       - messagebroker
+      - identity.api
     ports:
       - "6001:8080"
 
