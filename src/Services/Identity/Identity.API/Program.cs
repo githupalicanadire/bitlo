@@ -21,7 +21,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
-    
+
     // User settings
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedEmail = false;
@@ -52,6 +52,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins", policy =>
     {
         policy.WithOrigins(
+            "http://localhost:5000",
+            "https://localhost:5000",
             "http://localhost:6005",
             "https://localhost:6005",
             "http://localhost:6004",
@@ -82,9 +84,9 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    
+
     context.Database.EnsureCreated();
-    
+
     // Seed default user
     if (!context.Users.Any())
     {
@@ -96,7 +98,7 @@ using (var scope = app.Services.CreateScope())
             LastName = "User",
             EmailConfirmed = true
         };
-        
+
         await userManager.CreateAsync(defaultUser, "Admin123!");
     }
 }
