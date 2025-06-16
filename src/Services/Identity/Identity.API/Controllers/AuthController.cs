@@ -74,17 +74,89 @@ public class AuthController : ControllerBase
 
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
-            return BadRequest("Invalid email or password");
+        {
+            _logger.LogWarning("Login attempt with invalid email: {Email}", model.Email);
+            return BadRequest(new { error = "invalid_credentials", error_description = "Invalid email or password" });
+        }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 
         if (result.Succeeded)
         {
             _logger.LogInformation("User logged in successfully: {Email}", model.Email);
-            return Ok(new { message = "Login successful", userId = user.Id });
+
+            // Create claims for the user
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Name, user.FullName),
+                new Claim("given_name", user.FirstName),
+                new Claim("family_name", user.LastName),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            // Create Identity Server token request
+            var tokenRequest = new TokenCreationRequest
+            {
+                Subject = new ClaimsIdentity(claims),
+                ValidatedRequest = new ValidatedRequest
+                {
+                    Client = new IdentityServer4.Models.Client
+                    {
+                        ClientId = "shopping.web",
+                        AllowedScopes = { "openid", "profile", "email", "shopping.web", "catalog.api", "basket.api", "ordering.api" }
+                    },
+                    Options = new IdentityServerOptions()
+                }
+            };
+
+            // Generate tokens using Identity Server
+            var accessToken = await _tokenService.CreateAccessTokenAsync(tokenRequest);
+            var refreshToken = await _tokenService.CreateRefreshTokenAsync(new RefreshTokenCreationRequest
+            {
+                AccessToken = accessToken,
+                Client = tokenRequest.ValidatedRequest.Client,
+                Subject = tokenRequest.Subject
+            });
+
+            var tokenResponse = new
+            {
+                access_token = await _tokenService.CreateSecurityTokenAsync(accessToken),
+                refresh_token = refreshToken.CreationTime.ToString(),
+                token_type = "Bearer",
+                expires_in = accessToken.Lifetime,
+                scope = string.Join(" ", accessToken.Scopes),
+                user_info = new
+                {
+                    id = user.Id,
+                    email = user.Email,
+                    name = user.FullName,
+                    first_name = user.FirstName,
+                    last_name = user.LastName,
+                    email_verified = user.EmailConfirmed,
+                    created_date = user.CreatedDate
+                }
+            };
+
+            return Ok(tokenResponse);
         }
 
-        return BadRequest("Invalid email or password");
+        if (result.IsLockedOut)
+        {
+            _logger.LogWarning("User account locked out: {Email}", model.Email);
+            return BadRequest(new { error = "account_locked", error_description = "Account is temporarily locked" });
+        }
+
+        if (result.IsNotAllowed)
+        {
+            _logger.LogWarning("User login not allowed: {Email}", model.Email);
+            return BadRequest(new { error = "login_not_allowed", error_description = "Login not allowed" });
+        }
+
+        _logger.LogWarning("Invalid password for user: {Email}", model.Email);
+        return BadRequest(new { error = "invalid_credentials", error_description = "Invalid email or password" });
     }
 
     [HttpGet("users")]
