@@ -103,16 +103,18 @@ services:
 
   ordering.api:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Database=Server=orderdb;Database=OrderDb;User Id=sa;Password=SwN12345678;Encrypt=False;TrustServerCertificate=True
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
       - FeatureManagement__OrderFullfilment=false
+      - IdentityServer__BaseUrl=http://identity.api:8080
     depends_on:
       - orderdb
       - messagebroker
+      - identity.api
     ports:
       - "6003:8080"
 
