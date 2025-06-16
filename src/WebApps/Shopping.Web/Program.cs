@@ -29,11 +29,18 @@ builder.Services.AddAuthentication(options =>
 })
 .AddOpenIdConnect("oidc", options =>
 {
-    options.Authority = builder.Configuration["IdentityServer:BaseUrl"];
+    var authority = builder.Configuration["IdentityServer:BaseUrl"];
+    Console.WriteLine($"🔗 OpenID Connect Authority: {authority}");
+
+    options.Authority = authority;
     options.ClientId = "shopping.web";
     options.ResponseType = "code";
     options.SaveTokens = true;
     options.RequireHttpsMetadata = false; // Only for development
+
+    // Additional configuration for development
+    options.MetadataAddress = $"{authority}/.well-known/openid_configuration";
+    Console.WriteLine($"📋 Metadata Address: {options.MetadataAddress}");
 
     options.Scope.Clear();
     options.Scope.Add("openid");
