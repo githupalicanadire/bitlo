@@ -32,12 +32,23 @@
                     }
                 </div>
 
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        @Model.ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
                 <form method="post" class="auth-form">
+                    <input type="hidden" asp-for="ReturnUrl" />
+
                     <div class="form-group mb-3">
                         <label asp-for="LoginData.Email" class="form-label">
                             <i class="fas fa-envelope me-2"></i>Email
                         </label>
-                        <input asp-for="LoginData.Email" class="form-control" placeholder="Enter your email" />
+                        <input asp-for="LoginData.Email" class="form-control" placeholder="Enter your email" autocomplete="email" />
                         <span asp-validation-for="LoginData.Email" class="text-danger"></span>
                     </div>
 
@@ -45,7 +56,7 @@
                         <label asp-for="LoginData.Password" class="form-label">
                             <i class="fas fa-lock me-2"></i>Password
                         </label>
-                        <input asp-for="LoginData.Password" class="form-control" placeholder="Enter your password" />
+                        <input asp-for="LoginData.Password" class="form-control" placeholder="Enter your password" autocomplete="current-password" />
                         <span asp-validation-for="LoginData.Password" class="text-danger"></span>
                     </div>
 
@@ -57,7 +68,18 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 auth-btn">
-                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In with API
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+
+                <form method="post" asp-page-handler="OidcLogin" class="mb-3">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-shield-alt me-2"></i>Sign In with Identity Server
                     </button>
                 </form>
 
