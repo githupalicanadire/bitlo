@@ -77,6 +77,14 @@ if (!bypassAuth)
         }
     };
 });
+}
+else
+{
+    // Development mode without external authentication
+    builder.Services.AddAuthentication("Development")
+        .AddScheme<DevelopmentAuthenticationSchemeOptions, DevelopmentAuthenticationHandler>(
+            "Development", options => { });
+}
 
 builder.Services.AddRefitClient<ICatalogService>()
     .ConfigureHttpClient(c =>
