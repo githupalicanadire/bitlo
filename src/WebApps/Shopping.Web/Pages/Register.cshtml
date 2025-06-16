@@ -14,7 +14,31 @@
                     <p class="auth-subtitle">Join our community today</p>
                 </div>
 
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        @Model.ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (Model.ErrorMessages != null && Model.ErrorMessages.Any())
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <ul class="mb-0">
+                            @foreach (var error in Model.ErrorMessages)
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
                 <form method="post" class="auth-form">
+                    <input type="hidden" asp-for="ReturnUrl" />
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">

@@ -1,6 +1,21 @@
 namespace Identity.API.ViewModels;
 
-public class LoginViewModel
+public class RefreshTokenRequest
+{
+    [Required]
+    public string AccessToken { get; set; } = default!;
+
+    [Required]
+    public string RefreshToken { get; set; } = default!;
+}
+
+public class ValidateTokenRequest
+{
+    [Required]
+    public string AccessToken { get; set; } = default!;
+}
+
+public class LoginInputModel
 {
     [Required]
     [EmailAddress]

@@ -1,0 +1,27 @@
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading mb-1">Authentication Required</h5>
+                <p class="mb-2">You need to sign in to access this feature. Sign in to:</p>
+                <ul class="mb-2">
+                    <li>Add items to your cart</li>
+                    <li>View and manage your orders</li>
+                    <li>Complete checkout process</li>
+                    <li>Track your order history</li>
+                </ul>
+                <div class="d-flex gap-2">
+                    <a asp-page="/Login" class="btn btn-primary btn-sm">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </a>
+                    <a asp-page="/Register" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-user-plus me-1"></i>Register
+                    </a>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

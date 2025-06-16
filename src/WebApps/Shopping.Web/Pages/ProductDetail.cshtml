@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model Shopping.Web.Pages.ProductDetailModel
 @{
     ViewData["Title"] = "ProductDetail";
@@ -34,6 +34,26 @@
 
         <!-- Add to cart -->
         <div class="col-12 col-lg-6 add_to_cart_block">
+            <!-- Authentication Warning for Non-Authenticated Users -->
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-lg me-3"></i>
+                        <div class="flex-grow-1">
+                            <strong>Sign in required</strong>
+                            <p class="mb-0 small">You need to sign in to add this item to your cart.</p>
+                        </div>
+                        <div class="ms-auto">
+                            <a asp-page="/Login" asp-route-returnUrl="@($"/ProductDetail?productId={Model.Product.Id}")" class="btn btn-sm btn-primary">
+                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                            </a>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
             <div class="card bg-light mb-3">
                 <div class="card-body">
                     <p class="price">@Model.Product.Price TL</p>
@@ -107,4 +127,3 @@
         </div>
     </div>
 </div>
-
