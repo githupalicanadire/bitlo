@@ -46,6 +46,22 @@ builder.Services.AddIdentityServer(options =>
 .AddProfileService<ProfileService>()
 .AddDeveloperSigningCredential(); // Only for development
 
+// Add JWT Bearer Authentication for API endpoints
+builder.Services.AddAuthentication()
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = builder.Configuration["IdentityServer:IssuerUri"];
+        options.RequireHttpsMetadata = false; // Only for development
+        options.Audience = "catalog.api"; // Default audience
+
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateAudience = false, // Allow multiple audiences
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(5)
+        };
+    });
+
 // CORS
 builder.Services.AddCors(options =>
 {
