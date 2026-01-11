@@ -65,8 +65,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true
+      - IdentityServer__BaseUrl=http://identity.api:8080
     depends_on:
       - catalogdb
+      - identity.api
     ports:
       - "6000:8080"
 
@@ -80,11 +82,13 @@ services:
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
+      - IdentityServer__BaseUrl=http://identity.api:8080
     depends_on:
       - basketdb
       - distributedcache
       - discount.grpc
       - messagebroker
+      - identity.api
     ports:
       - "6001:8080"
 
@@ -93,6 +97,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Database=Data Source=discountdb
+      - IdentityServer__BaseUrl=http://identity.api:8080
     ports:
       - "6002:8080"
 
@@ -105,9 +110,11 @@ services:
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
       - FeatureManagement__OrderFullfilment=false
+      - IdentityServer__BaseUrl=http://identity.api:8080
     depends_on:
       - orderdb
       - messagebroker
+      - identity.api
     ports:
       - "6003:8080"
 
@@ -127,6 +134,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - IdentityServer__BaseUrl=http://identity.api:8080
     depends_on:
       - catalog.api
       - basket.api
