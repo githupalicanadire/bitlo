@@ -7,11 +7,27 @@ namespace Shopping.Web.Pages;
 
 public class LoginModel : PageModel
 {
+    private readonly IConfiguration _configuration;
+
     [BindProperty]
     public LoginInputModel LoginData { get; set; } = default!;
 
+    public LoginModel(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     public async Task<IActionResult> OnGetAsync(string? returnUrl = null)
     {
+        // Check if we're in development bypass mode
+        var bypassAuth = _configuration.GetValue<bool>("DevelopmentMode:BypassAuthentication");
+
+        if (bypassAuth)
+        {
+            // In development mode, redirect directly to home
+            return LocalRedirect(returnUrl ?? "/");
+        }
+
         // If user is already authenticated, redirect to return URL or home
         if (User.Identity?.IsAuthenticated == true)
         {
